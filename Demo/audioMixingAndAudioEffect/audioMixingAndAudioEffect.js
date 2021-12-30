@@ -94,12 +94,17 @@ $("#volume").click(function (e) {
 
 $("#local-audio-mixing").click(function (e) {
   // get selected file
-  const file = $("#local-file").prop("files")[0];
-  if (!file) {
+  //const file = $("#local-file").prop("files")[0];
+  file = $("#remote-file").val();
+  /*if (!file) {
     console.warn("please choose a audio file");
     return;
-  }
-  startAudioMixing(file);
+  }*/
+  sampleRate = $("#sample-rate").val();
+  stereo = $("#stereo").val();
+  bitrate = $("#bitrate").val();
+	
+  startAudioMixing(file, sampleRate, stereo, bitrate);
   return false;
 })
 
@@ -122,14 +127,21 @@ function setVolume(value) {
   localTracks.audioMixingTrack.setVolume(parseInt(value));
 }
 
-async function startAudioMixing(file) {
+async function startAudioMixing(file, sampleRate, stereo, bitrate) {
   if(audioMixing.state === "PLAYING" || audioMixing.state === "LOADING") return;
   const options = {};
   if (file) {
     options.source = file;
   } else {
-    options.source = "HeroicAdventure.mp3";
+    options.source = "https://13.57.19.219/ff-16b-2c-44100hz.mp4";
   }
+  options.sampleRate = parseInt(sampleRate);
+  if(stereo == "true")
+    options.stereo = true;
+  else
+    options.stereo = false;
+  options.bitrate = parseInt(bitrate);
+
   try {
     audioMixing.state = "LOADING";
     // if the published track will not be used, you had better unpublish it
@@ -137,10 +149,21 @@ async function startAudioMixing(file) {
       await client.unpublish(localTracks.audioMixingTrack);
     }
     // start audio mixing with local file or the preset file
-    localTracks.audioMixingTrack = await AgoraRTC.createBufferSourceAudioTrack(options);
+    //localTracks.audioMixingTrack = await AgoraRTC.createBufferSourceAudioTrack(options);
+    localTracks.audioMixingTrack = await AgoraRTC.createBufferSourceAudioTrack({
+      source: options.source,
+      encoderConfig: {
+	sampleRate: options.sampleRate,
+	stereo: options.stereo,
+	bitrate: options.bitrate,
+      },
+    });
     await client.publish(localTracks.audioMixingTrack);
+    console.log("Remote Source: " + localTracks.audioMixingTrack.source);
+    console.log("SETTINGS OF MIXING TRACK: " + JSON.stringify(localTracks.audioMixingTrack.getMediaStreamTrack().getSettings()));
     localTracks.audioMixingTrack.play();
     localTracks.audioMixingTrack.startProcessAudioBuffer({ loop: true });
+    //localTracks.audioMixingTrack.seekAudioBuffer(1);
 
     audioMixing.duration = localTracks.audioMixingTrack.duration;
     $(".audio-duration").text(toMMSS(audioMixing.duration));
@@ -202,6 +225,12 @@ async function playEffect(cycle, options) {
     await client.unpublish(localTracks.audioEffectTrack);
   }
   localTracks.audioEffectTrack = await AgoraRTC.createBufferSourceAudioTrack(options);
+  /*console.log("HAR HAR MAHADEVA");
+  localTracks.audioEffectTrack = await AgoraRTC.createBufferSourceAudioTrack(options)
+    .then(bufferSourceAudioTrack => {
+      console.log("[RTC] created audio track source: " + audio.source + ", position: " + audio.position + "/" + bufferSourceAudioTrack.duration + ", volume: " + volume + ", track settings: " + JSON.stringify(bufferSourceAudioTrack.getMediaStreamTrack().getSettings()));
+  })
+  .catch((e) => console.log("ERROR creating source audio track"));*/
   await client.publish(localTracks.audioEffectTrack);
   localTracks.audioEffectTrack.play();
   localTracks.audioEffectTrack.startProcessAudioBuffer({ cycle });

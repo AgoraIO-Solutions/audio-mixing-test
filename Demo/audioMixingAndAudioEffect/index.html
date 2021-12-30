@@ -63,7 +63,23 @@
     <div class="button-group">
       <div>
         <button id="local-audio-mixing" type="button" class="btn btn-primary btn-sm" disabled>Start Local Audio Mixing</button>
-        <input id="local-file" type="file">
+	<div class="row join-info-group">
+	<div class="col-sm">
+	  <p class="join-info-text">Sample Rate</p>
+	  <input id="sample-rate" type="text" value="48000">
+	</div>
+	<div class="col-sm">
+	  <p class="join-info-text">Stereo</p>
+	  <input id="stereo" type="text" value="false">
+	</div>
+	<div class="col-sm">
+	  <p class="join-info-text">Bitrate</p>
+	  <input id="bitrate" type="text" value="192">
+	</div>
+	</div>
+	<!--<input id="local-file" type="file">-->
+	<p class="join-info-text">Remote File</p>
+	<input id="remote-file" type="text" placeholder="https://13.57.19.219/ff-16b-2c-44100hz.mp4">
       </div>
       <button id="audio-mixing" type="button" class="btn btn-primary btn-sm" disabled>Start Preset Audio Mixing</button>
       <button id="stop-audio-mixing" type="button" class="btn btn-primary btn-sm" disabled>Stop Audio Mixing</button>
@@ -101,7 +117,7 @@
 
   <script src="../assets/jquery-3.4.1.min.js"></script>
   <script src="../assets/bootstrap.bundle.min.js"></script>
-  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <script src="../AgoraRTC_N-4.7.3.js"></script>
   <script src="./audioMixingAndAudioEffect.js"></script>
 </body>
 </html>
